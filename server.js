@@ -1,47 +1,50 @@
 const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json()); // For parsing JSON data
+app.use(cors({ origin: 'http://localhost:4200' }));
+app.use(express.json());
 
-// Define a test route
-app.get('/', (req, res) => {
-  res.send('Hello, this is the insurance tracker API!');
-});
+// Utility to read users from JSON file
+function readUsers() {
+  try {
+    const data = fs.readFileSync('users.json', 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    return [];
+  }
+}
 
-// Simulate a database (in-memory storage for simplicity)
-let users = [];
+// Utility to write users to JSON file
+function writeUsers(users) {
+  fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
+}
 
-// POST route for registration
+// POST /register route
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
-  // Check if user already exists
+  let users = readUsers();
+
   const existingUser = users.find(user => user.username === username);
   if (existingUser) {
     return res.status(400).send('User already exists');
   }
 
-  // Save the user (this is just an example, you'd hash passwords in real apps)
   users.push({ username, password });
+  writeUsers(users);
+
   res.status(201).send('User registered successfully');
 });
 
-// POST route for login
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-
-  // Find the user
-  const user = users.find(user => user.username === username && user.password === password);
-  if (!user) {
-    return res.status(401).send('Invalid credentials');
-  }
-
-  res.send('Login successful');
+// GET /users route for testing
+app.get('/users', (req, res) => {
+  const users = readUsers();
+  res.json(users);
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

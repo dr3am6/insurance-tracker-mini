@@ -13,4 +13,8 @@ export class AuthService {
   register(username: string, password: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/register`, { username, password }, { responseType: 'text' });
   }
+
+  isLoggedIn(): boolean {
+  return !!localStorage.getItem('token'); // Or however you track login
+}
 }
