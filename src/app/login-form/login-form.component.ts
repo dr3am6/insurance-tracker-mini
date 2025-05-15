@@ -28,6 +28,7 @@ export class LoginFormComponent {
 
         if (user) {
           // ✅ Redirect here
+          localStorage.setItem('isLoggedIn', 'true'); // ✅ REQUIRED for AuthGuard to allow access
           this.router.navigate(['/dashboard']); // change '/dashboard' to your target route
         } else {
           this.message = 'Login failed: Invalid credentials.';
